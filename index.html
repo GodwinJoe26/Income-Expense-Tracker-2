@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/css/bootstrap.min.css">
+    <title>Income Expense Tracker</title>
+    <style>
+        body {
+            background-color: skyblue; 
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .transaction-list {
+            margin-top: 20px;
+        }
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+
+        
+        .btn-primary {
+            background-color: orange;
+            border-color: orange;
+        }
+
+        
+        .btn-danger {
+            background-color: red;
+            border-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Income Expense Tracker</h1>
+        <form id="transaction-form">
+            <div class="mb-3">
+                <label for="transaction-type">Transaction Type:</label>
+                <select class="form-select mb-3" id="transaction-type" required>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+
+                <label for="transaction-description">Description:</label>
+                <input type="text" class="form-control mb-3" id="transaction-description" required>
+
+                <label for="transaction-amount">Amount (₹):</label>
+                <input type="number" class="form-control mb-3" id="transaction-amount" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Transaction</button>
+        </form>
+
+        <div class="transaction-list mt-4">
+            <h2>Transaction History : </h2>
+            <ul id="transactions" class="list-group">
+                <!-- Transaction items will be added here -->
+            </ul>
+        </div>
+
+        <h3 class="mt-4">Balance: ₹<span id="balance">0.00</span></h3>
+    </div>
+
+    <script>
+        const transactionForm = document.getElementById("transaction-form");
+        const transactionType = document.getElementById("transaction-type");
+        const transactionDescription = document.getElementById("transaction-description");
+        const transactionAmount = document.getElementById("transaction-amount");
+        const transactionsList = document.getElementById("transactions");
+        const balanceDisplay = document.getElementById("balance");
+
+        let transactions = [];
+
+        transactionForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const type = transactionType.value;
+            const description = transactionDescription.value;
+            const amount = parseFloat(transactionAmount.value);
+
+            if (!description || isNaN(amount) || amount <= 0) {
+                return;
+            }
+
+            const transaction = {
+                type,
+                description,
+                amount,
+            };
+
+            transactions.push(transaction);
+            updateTransactionsList();
+            updateBalance();
+            resetForm();
+        });
+
+        function updateTransactionsList() {
+            transactionsList.innerHTML = "";
+            transactions.forEach((transaction, index) => {
+                const listItem = document.createElement("li");
+                listItem.classList.add("list-group-item", "transaction-item");
+                listItem.innerHTML = `
+                    ${transaction.description}: ₹${transaction.amount.toFixed(2)}
+                    <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${index})">Delete</button>
+                `;
+                transactionsList.appendChild(listItem);
+            });
+        }
+
+        function updateBalance() {
+            const income = transactions.reduce((total, transaction) => {
+                return transaction.type === "income" ? total + transaction.amount : total;
+            }, 0);
+            const expenses = transactions.reduce((total, transaction) => {
+                return transaction.type === "expense" ? total + transaction.amount : total;
+            }, 0);
+            const balance = income - expenses;
+            balanceDisplay.textContent = `${balance.toFixed(2)}`;
+        }
+
+        function resetForm() {
+            transactionType.value = "income";
+            transactionDescription.value = "";
+            transactionAmount.value = "";
+        }
+
+        function deleteTransaction(index) {
+            transactions.splice(index, 1);
+            updateTransactionsList();
+            updateBalance();
+        }
+    </script>
+</body>
+</html>
